@@ -45,8 +45,6 @@ output = model.transform(cz_df)
 
 # evaluate cluster quality
 silhouette = ClusteringEvaluator().evaluate(output)
-print('**************************************************\n')
-print("Silhouette with squared euclidean distance = " + str(silhouette))
 
 # check cluster stat range
 clst_df = \
@@ -55,12 +53,14 @@ output.groupby('prediction')\
            min("MEAN_CLOSE_DEF_DIST").alias("MIN_CLOSE_DEF_DIST"),max("MEAN_CLOSE_DEF_DIST").alias("MAX_CLOSE_DEF_DIST"),avg("MEAN_CLOSE_DEF_DIST").alias("MEAN_CLOSE_DEF_DIST"),
            min("MEAN_SHOT_CLOCK").alias("MIN_SHOT_CLOCK"),max("MEAN_SHOT_CLOCK").alias("MAX_SHOT_CLOCK"),avg("MEAN_SHOT_CLOCK").alias("MEAN_SHOT_CLOCK"),)
 
-print("Comfort Zone Cluster Profile:\n")
-clst_df.show()
-print('\n\nPlayer of Interest Best Zone and Accuracy:')
+
+clst_pd = clst_df.toPandas()
 
 # get player of interest best zone based on accuracy
 poi_lst = ["james harden", 'chris paul', "stephen curry", "lebron james"]
+zone_lst, zone_shot_dist_lst, zone_close_def_dist_lst, zone_shot_clock_lst = [],[],[],[]
+accuracy_lst = []
+
 for player in poi_lst:
   zone_performance = []
   for cluster in clst_df.collect():
@@ -78,12 +78,26 @@ for player in poi_lst:
   zone = int(np.argmax(zone_performance))
   #print(player, zone)
   zone_row = clst_df.filter(clst_df.prediction == zone).select('MEAN_SHOT_DIST', "MEAN_CLOSE_DEF_DIST", "MEAN_SHOT_CLOCK")
+  
+  zone_lst.append(zone)
+  zone_shot_dist_lst.append(zone_row.first()['MEAN_SHOT_DIST'])
+  zone_close_def_dist_lst.append(zone_row.first()['MEAN_CLOSE_DEF_DIST'])
+  zone_shot_clock_lst.append(zone_row.first()['MEAN_SHOT_CLOCK'])
+  acuuracy_lst.append(np.max(zone_performance)*100)
 
-  print("{}:\tZone {} - [{:.1f}, {:.1f}, {:.1f}]\tAccuracy: {:.1f}%".format(player, zone, 
-                        zone_row.first()['MEAN_SHOT_DIST'], 
-                        zone_row.first()['MEAN_CLOSE_DEF_DIST'],
-                        zone_row.first()['MEAN_SHOT_CLOCK'],
-                        np.max(zone_performance)*100
+# output
+print('**************************************************\n')
+print("Silhouette with squared euclidean distance = " + str(silhouette)+"\n")
+print('\nPlayer of Interest Best Zone and Accuracy:')
+for i in range(len(poi_lst)):
+  print("{}:\tZone {} - [{:.1f}, {:.1f}, {:.1f}]\tAccuracy: {:.1f}%".format(
+                        poi_lst[i], zone_lst[i], 
+                        zone_shot_dist_lst[i], 
+                        zone_close_def_dist_lst[i],
+                        zone_shot_clock_lst[i],
+                        accuracy_lst[i]
                         ))
+print("\nComfort Zone Cluster Profile:\n")
+print(clst_pd)
 print('**************************************************')
 spark.stop()
