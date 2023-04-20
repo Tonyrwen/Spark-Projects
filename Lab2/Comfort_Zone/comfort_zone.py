@@ -12,26 +12,26 @@ spark = SparkSession.builder.appName("Comfort_Zone_KMean").getOrCreate()
 df = spark.read.format("csv").option("header", "true").load(sys.argv[1])
 
 # data preprocessing
-## drop irrelevant columns, type correct, and drop NAs
+# drop irrelevant columns, type correct, and drop NAs
 df = \
 df.select("player_id", "player_name", "SHOT_DIST", "CLOSE_DEF_DIST", "SHOT_CLOCK", "SHOT_RESULT")\
   .withColumn('SHOT_RESULT', when(df.SHOT_RESULT == "made", 1)\
                             .when(df.SHOT_RESULT == "missed", 0)\
                             .otherwise(None))\
-  .withColumns({'player_id': col("player_id").cast("int"),
-                'SHOT_DIST': col("SHOT_DIST").cast('double'),
-                'CLOSE_DEF_DIST': col("CLOSE_DEF_DIST").cast('double'),
-                'SHOT_CLOCK': col("SHOT_CLOCK").cast('double')})\
+  .withColumn('player_id', col("player_id").cast('int'))\
+  .withColumn('SHOT_DIST', col('SHOT_DIST').cast('double'))\
+  .withColumn('CLOSE_DEF_DIST', col('CLOSE_DEF_DIST').cast('double'))\
+  .withColumn('SHOT_CLOCK', col('SHOT_CLOCK').cast('double'))\
   .na.drop()
 
-## get player average stats
+# get player average stats
 cz_df = \
 df.groupBy("player_id").avg('SHOT_DIST', 'CLOSE_DEF_DIST', 'SHOT_CLOCK')\
-  .withColumnsRenamed({'avg(SHOT_DIST)':'MEAN_SHOT_DIST',
-                       'avg(CLOSE_DEF_DIST)':'MEAN_CLOSE_DEF_DIST',
-                       'avg(SHOT_CLOCK)':'MEAN_SHOT_CLOCK',})
+  .withColumnRenamed('avg(SHOT_DIST)', 'MEAN_SHOT_DIST')\
+  .withColumnRenamed('avg(CLOSE_DEF_DIST)', 'MEAN_CLOSE_DEF_DIST')\
+  .withColumnRenamed('avg(SHOT_CLOCK)', 'MEAN_SHOT_CLOCK')
   
-## create features column and standardize it
+# create features column and standardize it
 assemble = VectorAssembler(inputCols = ['MEAN_SHOT_DIST','MEAN_CLOSE_DEF_DIST','MEAN_SHOT_CLOCK'],
                            outputCol = 'features')
 scaler = StandardScaler(inputCol = 'features', outputCol = 'standardized')
