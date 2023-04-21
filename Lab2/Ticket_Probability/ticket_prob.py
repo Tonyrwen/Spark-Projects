@@ -18,8 +18,8 @@ if __name__ == "__main__":
              (col("Street Code3").isin(['34510','10030','34050'])))
   
   # check and return how many black cars are in the dataset
-  print("\n**************************************************\n")
-  print("There is {:.2f}% chance of a Black Car to be ticketed\nif it is parked illegally at a street containing code:\n34510 or 10030 or 34050"\
+
+  print("\n\nThere is {:.2f}% chance of a Black Car to be ticketed\nif it is parked illegally at a street containing code:\n34510 or 10030 or 34050\n\n"\
         .format(df.filter(col('Vehicle Color').isin(["BLACK",'BLK','Black', "BK"])).count()/df.count()*100))
-  print("\n**************************************************\n")
+
   spark.stop()
