@@ -14,7 +14,7 @@
 + Parts:
   > Go to any of the sections and `bash test.sh`
   + Comfort_Zone == Part 1
-  + Ticket_Prob == Part 2
+  + Ticket_Probability == Part 2
   + Ticket_Time == Part 3
   
   
