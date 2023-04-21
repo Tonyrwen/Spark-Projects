@@ -13,6 +13,7 @@
 
 + Parts:
   > Go to any of the sections and `bash test.sh`
+  <br>When prompted, enter the internal ip of your manager vm
   + Comfort_Zone == Part 1
   + Ticket_Probability == Part 2
   + Ticket_Time == Part 3
