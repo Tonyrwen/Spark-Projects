@@ -10,7 +10,7 @@ import sys
 if __name__ = "__main__":
   spark = SparkSession.builder.appName("Ticket_Time").getOrCreate()
 
-  spark.read.format("csv").option("header", "true").load("/content/parking-violation-2023.csv")\
+  spark.read.format("csv").option("header", "true").load(sys.argv[1])\
       .select('Violation Time').na.drop()\
       .filter(length(col('Violation Time')) == 5)\
       .withColumn('Violation Hour', col("Violation Time").substr(1, 2))\
