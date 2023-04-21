@@ -7,7 +7,7 @@ from pyspark.sql import SparkSession
 import numpy as np
 import sys
 
-if __name__ = "__main__":
+if __name__ == "__main__":
   spark = SparkSession.builder.appName("Ticket_Time").getOrCreate()
 
   spark.read.format("csv").option("header", "true").load(sys.argv[1])\
