@@ -11,7 +11,7 @@ if __name__ == "__main__":
   spark = SparkSession.builder.appName("Ticket_Prob").getOrCreate()
   
   # load in data and preprocess 
-  df = spark.read.format("csv").option("header", "true").load("/content/parking-violation-2023.csv")\
+  df = spark.read.format("csv").option("header", "true").load(sys.argv[1])\
      .select('Vehicle Color','Street Code1', 'Street Code2', 'Street Code3','Street Name').na.drop()\
      .filter((col("Street Code1").isin(['34510','10030','34050']))|\
              (col("Street Code2").isin(['34510','10030','34050']))|\
