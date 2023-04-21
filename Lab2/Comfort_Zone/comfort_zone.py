@@ -83,7 +83,7 @@ for player in poi_lst:
   zone_shot_dist_lst.append(zone_row.first()['MEAN_SHOT_DIST'])
   zone_close_def_dist_lst.append(zone_row.first()['MEAN_CLOSE_DEF_DIST'])
   zone_shot_clock_lst.append(zone_row.first()['MEAN_SHOT_CLOCK'])
-  acuuracy_lst.append(np.max(zone_performance)*100)
+  accuracy_lst.append(np.max(zone_performance)*100)
 
 # output
 print('**************************************************\n')
