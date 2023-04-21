@@ -12,8 +12,9 @@
   6. `wget -O parking-violation-2023.csv https://data.cityofnewyork.us/api/views/pvqr-7yc4/rows.csv?accessType=DOWNLOAD`
 
 + Parts:
+  > Go to any of the sections and `bash test.sh`
   + Comfort_Zone == Part 1
   + Ticket_Prob == Part 2
   + Ticket_Time == Part 3
-  > Go to any of the sections and `bash test.sh`
+  
   
