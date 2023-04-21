@@ -54,7 +54,7 @@ output.groupby('prediction')\
            min("MEAN_SHOT_CLOCK").alias("MIN_SHOT_CLOCK"),max("MEAN_SHOT_CLOCK").alias("MAX_SHOT_CLOCK"),avg("MEAN_SHOT_CLOCK").alias("MEAN_SHOT_CLOCK"),)
 
 
-clst_pd = clst_df.toPandas()
+clst_pd = clst_df.toPandas().T
 
 # get player of interest best zone based on accuracy
 poi_lst = ["james harden", 'chris paul', "stephen curry", "lebron james"]
