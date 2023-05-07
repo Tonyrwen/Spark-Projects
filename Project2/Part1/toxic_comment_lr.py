@@ -22,9 +22,9 @@ spark = SparkSession.builder.appName("Toxic Comment Classification")\
                             .getOrCreate()
 
 # load in train and test
-train_df = pd.read_csv('train.csv')
+train_df = pd.read_csv(sys.argv[1])
 train_df.fillna('', inplace = True)
-test_df = pd.read_csv('test.csv')
+test_df = pd.read_csv(sys.argv[2])
 test_df.fillna('', inplace = True)
 
 train_df = spark.createDataFrame(train_df)
