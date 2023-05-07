@@ -57,5 +57,16 @@ evaluator = BinaryClassificationEvaluator(rawPredictionCol = "rawPrediction",
                                           labelCol = "toxic")
 train_auc = evaluator.evaluate(train_result)
 test_auc = evaluator.evaluate(test_result)
-print("Train AUC: {}".format(train_auc))
-print("Test AUC: {}".format(test_auc))
+
+accuracy = []
+for result in [train_result, test_result]:
+  TN = result.filter('prediction = 0 AND toxic = prediction').count()
+  TP = result.filter('prediction = 1 AND toxic = prediction').count()
+  FN = result.filter('prediction = 0 AND toxic = 1').count()
+  FP = result.filter('prediction = 1 AND toxic = 0').count()
+
+  #Accuracy measures the proportion of correct predictions
+  accuracy.append((TN + TP) / (TN + TP + FN + FP))
+
+print("Train AUC: {}\tTrain Accuracy: {}".format(train_auc, accuracy[0]))
+print("Test AUC: {}\tTest Accuracy: {}".format(test_auc, accuracy[1]))
