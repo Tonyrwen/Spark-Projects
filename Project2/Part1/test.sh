@@ -3,7 +3,7 @@ source ../../env.sh
 ../../start.sh
 
 /usr/local/hadoop/bin/hdfs dfs -rm -r /toxic_comment/input/
-/usr/local/hadoop/bin/hdfs dfs -mkdir -p /comfort_zone/input/
+/usr/local/hadoop/bin/hdfs dfs -mkdir -p /toxic_comment/input/
 /usr/local/hadoop/bin/hdfs dfs -copyFromLocal train.csv /toxic_comment/input/
 /usr/local/hadoop/bin/hdfs dfs -copyFromLocal test.csv /toxic_comment/input/
 /usr/local/hadoop/bin/hdfs dfs -copyFromLocal test_labels.csv /toxic_comment/input/
