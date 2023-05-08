@@ -1,13 +1,14 @@
-
 from __future__ import print_function
-from pyspark.ml.feature import Tokenizer, HashingTF, IDF
-from pyspark.ml.classification import LogisticRegression
+from pyspark.ml import Pipeline
 from pyspark.ml.evaluation import BinaryClassificationEvaluator
-from pyspark.sql.functions import when, col, min, max, avg, concat, lit, desc, substring, length
+from pyspark.ml.feature import Tokenizer, StopWordsRemover, HashingTF, IDF
+from pyspark.ml.classification import LogisticRegression
+from pyspark.sql.functions import udf, when, col, min, max, avg, concat, lit, desc, substring, length
+from pyspark.sql.types import StringType
 from pyspark.sql import SparkSession
 import pandas as pd
 import numpy as np
-import sys
+import string, re, nltk, sys
 
 spark = SparkSession.builder.appName("Toxic Comment Classification")\
                             .enableHiveSupport()\
@@ -22,35 +23,39 @@ spark = SparkSession.builder.appName("Toxic Comment Classification")\
                             .getOrCreate()
 
 # load in train and test
-train_df = pd.read_csv(sys.argv[1])
-train_df.fillna('', inplace = True)
-test_df = pd.read_csv(sys.argv[2])
-test_df.fillna('', inplace = True)
+def to_spark_df(csv, withLabels = True, withText = True):
+  df = pd.read_csv(csv)
+  df.fillna('', inplace = True)
 
-train_df = spark.createDataFrame(train_df)
-test_df = spark.createDataFrame(test_df)
+  if withLabels:
+    if withText: return spark.createDataFrame(df[['id','comment_text','toxic']])
+    else: return spark.createDataFrame(df[['id', 'toxic']])
+  else: return spark.createDataFrame(df[['id','comment_text']])
 
+train_df = to_spark_df(sys.argv[1])
+test_df = to_spark_df(sys.argv[2], False)
+test_label = to_spark_df(sys.argv[3], True, False)
+
+# clean text
+nltk.download('stopwords')
+stopwords = list(string.punctuation) + nltk.corpus.stopwords.words('english')
+cleanTextUDF = udf(lambda text: "".join(i for i in text.replace('\n', ' ').lower() if i not in stopwords),
+                   StringType())
+train_df = train_df.withColumn("cleaned_comment", cleanTextUDF(col('comment_text')))
+test_df = test_df.withColumn("cleaned_comment", cleanTextUDF(col('comment_text')))\
+                 .withColumn('toxic', col('toxic')*-1)
 
 # tokenize sentences > count frequency > convert to tfidf for classification
-tokenizer = Tokenizer(inputCol = "comment_text", outputCol = "tokens")
-hashingTF = HashingTF(inputCol = "tokens", outputCol = "tf")
-idf = IDF(inputCol = "tf", outputCol = "features")
+pipeline = Pipeline(stages = [
+    Tokenizer(inputCol = "cleaned_comment", outputCol = "words"),
+    HashingTF(inputCol = "words", outputCol = "word_frequency"),
+    IDF(inputCol = "word_frequency", outputCol = "features"),
+    LogisticRegression(featuresCol = "features", labelCol = "toxic", regParam = 0.1)
+])
+fit_model = pipeline.fit(train_df)
 
-train_tf = hashingTF.transform(tokenizer.transform(train_df))
-trainIDFmodel = idf.fit(train_tf)
-train_tfidf = trainIDFmodel.transform(train_tf)
-
-test_tf = hashingTF.transform(tokenizer.transform(test_df))
-testIDFmodel = idf.fit(test_tf)
-test_tfidf = trainIDFmodel.transform(test_tf)
-
-# Logisitic Regression
-lr = LogisticRegression(featuresCol = 'features',
-                        labelCol = "toxic",
-                        regParam = 0.1)
-lrModel = lr.fit(train_tfidf)
-train_result = lrModel.transform(train_tfidf)
-test_result = lrModel.transform(test_tfidf)
+train_result = fit_model.transform(train_df)
+test_result = fit_model.transform(test_df)
 
 # Evaluate Prediction Result
 evaluator = BinaryClassificationEvaluator(rawPredictionCol = "rawPrediction",
