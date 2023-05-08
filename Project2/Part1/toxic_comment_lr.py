@@ -35,6 +35,7 @@ def to_spark_df(csv, withLabels = True, withText = True):
 train_df = to_spark_df(sys.argv[1])
 test_df = to_spark_df(sys.argv[2], False)
 test_label = to_spark_df(sys.argv[3], True, False)
+test_df = test_df.join(test_label, ['id'], 'inner')
 
 # clean text
 nltk.download('stopwords')
