@@ -8,7 +8,7 @@ from pyspark.sql.types import StringType
 from pyspark.sql import SparkSession
 import pandas as pd
 import numpy as np
-import string, re, nltk, sys
+import string, re, sys
 
 if __name__ == "__main__":
   spark = SparkSession.builder.appName("Toxic Comment Classification")\
@@ -39,9 +39,7 @@ if __name__ == "__main__":
   test_df = test_df.join(test_label, ['id'], 'inner')
 
   # clean text
-  nltk.download('stopwords')
-  stopwords = list(string.punctuation) + nltk.corpus.stopwords.words('english')
-  cleanTextUDF = udf(lambda text: "".join(i for i in text.replace('\n', ' ').lower() if i not in stopwords),
+  cleanTextUDF = udf(lambda text: "".join(i for i in text.replace('\n', ' ').lower() if i not in string.punctuation),
                      StringType())
   train_df = train_df.withColumn("cleaned_comment", cleanTextUDF(col('comment_text')))
   test_df = test_df.withColumn("cleaned_comment", cleanTextUDF(col('comment_text')))\
@@ -74,6 +72,7 @@ if __name__ == "__main__":
 
     #Accuracy measures the proportion of correct predictions
     accuracy.append((TN + TP) / (TN + TP + FN + FP))
+    
   print('\n**************************************************\n\n')
   print("Train AUC: {}\tTrain Accuracy: {}".format(train_auc, accuracy[0]))
   print("Test AUC: {}\tTest Accuracy: {}".format(test_auc, accuracy[1]))
