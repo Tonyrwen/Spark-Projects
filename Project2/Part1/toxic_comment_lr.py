@@ -1,4 +1,3 @@
-from __future__ import print_function
 from pyspark.ml import Pipeline
 from pyspark.ml.evaluation import BinaryClassificationEvaluator
 from pyspark.ml.feature import Tokenizer, StopWordsRemover, HashingTF, IDF
@@ -12,15 +11,6 @@ import string, re, sys
 
 if __name__ == "__main__":
   spark = SparkSession.builder.appName("Toxic Comment Classification")\
-                              .enableHiveSupport()\
-                              .config('spark.executor.memory','4G')\
-                              .config('spark.driver.memory','18G')\
-                              .config('spark.executor.cores','7')\
-                              .config('spark.python.worker.memory','4G')\
-                              .config('spark.driver.maxResultSize','0')\
-                              .config('spark.sql.crossJoin.enabled','true')\
-                              .config('spark.serializer','org.apache.spark.serializer.KryoSerializer')\
-                              .config('spark.default.parallelism','2')\
                               .getOrCreate()
 
   # load in train and test
@@ -73,7 +63,7 @@ if __name__ == "__main__":
     #Accuracy measures the proportion of correct predictions
     accuracy.append((TN + TP) / (TN + TP + FN + FP))
     
-  print('\n**************************************************\n\n')
+  print('\n**************************************************\n')
   print("Train AUC: {}\tTrain Accuracy: {}".format(train_auc, accuracy[0]))
   print("Test AUC: {}\tTest Accuracy: {}".format(test_auc, accuracy[1]))
   print('\n**************************************************')
