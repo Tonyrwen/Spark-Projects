@@ -1,3 +1,4 @@
+from __future__ import print_function
 from pyspark.ml import Pipeline
 from pyspark.ml.evaluation import BinaryClassificationEvaluator
 from pyspark.ml.feature import Tokenizer, StopWordsRemover, HashingTF, IDF
@@ -10,8 +11,7 @@ import numpy as np
 import string, re, sys
 
 if __name__ == "__main__":
-  spark = SparkSession.builder.appName("Toxic Comment Classification")\
-                              .getOrCreate()
+  spark = SparkSession.builder.appName("Toxic Comment Classification").getOrCreate()
 
   # load in train and test
   train_df = spark.read.format("csv")\
