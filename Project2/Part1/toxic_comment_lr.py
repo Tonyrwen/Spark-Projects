@@ -24,18 +24,18 @@ if __name__ == "__main__":
                               .getOrCreate()
 
   # load in train and test
-  def to_spark_df(csv, withLabels = True, withText = True):
-    df = pd.read_csv(csv)
-    df.fillna('', inplace = True)
-
-    if withLabels:
-      if withText: return spark.createDataFrame(df[['id','comment_text','toxic']])
-      else: return spark.createDataFrame(df[['id', 'toxic']])
-    else: return spark.createDataFrame(df[['id','comment_text']])
-
-  train_df = to_spark_df(sys.argv[1])
-  test_df = to_spark_df(sys.argv[2], False)
-  test_label = to_spark_df(sys.argv[3], True, False)
+  train_df = spark.read.format("csv")\
+                        .options(header = 'true', inferschema = 'true', quote = '"', escape = '"', multiline = "true")\
+                        .load(sys.argv[1])\
+                        .select(col('id'), col('comment_text'), col('toxic'))
+  test_df = spark.read.format("csv")\
+                        .options(header = 'true', inferschema = 'true', quote = '"', escape = '"', multiline = "true")\
+                        .load(sys.argv[2])\
+                        .select(col('id'), col('comment_text'))
+  test_label = spark.read.format("csv")\
+                        .options(header = 'true', inferschema = 'true', quote = '"', escape = '"', multiline = "true")\
+                        .load(sys.argv[3])\
+                        .select(col('id'), col('toxic'))           
   test_df = test_df.join(test_label, ['id'], 'inner')
 
   # clean text
