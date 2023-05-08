@@ -130,8 +130,6 @@ if __name__ == "__main__":
     results.filter(results['Labels'] == 0).select('Labels','prediction').show(100)
     #Metrics values
     AUC = my_eval.evaluate(results)
-    print(f'----------The ACU result is:  {AUC}----------')
-
 
     TN = results.filter('prediction = 0 AND Labels = prediction').count()
     TP = results.filter('prediction = 1 AND Labels = prediction').count()
@@ -140,10 +138,12 @@ if __name__ == "__main__":
 
     #Accuracy measures the proportion of correct predictions
     accuracy = (TN + TP) / (TN + TP + FN + FP)
+
+    print("\n**************************************************\n")
+    print(f'The Test AUC is:\t{AUC}')
     print()
-    print()
-    print()
-    print(f'----------The Accuracy result is:   {accuracy}----------')
+    print(f'The Test Accuracy is:\t{accuracy}')
+    print("\n**************************************************\n")
 
     spark.stop()
 
